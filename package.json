@@ -1,0 +1,21 @@
+{
+  "name": "spotifybot",
+  "version": "0.1.0",
+  "description": "Spotify recomendations bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "botbuilder": "^3.2.3",
+    "cheerio": "^0.22.0",
+    "google-search": "0.0.4",
+    "promise": "^7.1.1",
+    "requests": "^0.1.7",
+    "require-tree": "^1.1.1",
+    "restify": "^4.1.1",
+    "spotify-web-api-node": "^2.3.5"
+  }
+}
