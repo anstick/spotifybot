@@ -7,11 +7,12 @@ var googleSearch = new GoogleSearch({
     cx: process.env.GOOGLE_CUSTOM_SEARCH_CX
 });
 
-exports.search = function (query) {
+exports.search = function (query, count) {
+    var count = count || 5;
     return new Promise(function (done, fail) {
         googleSearch.build({
             q: query.split(' ').join('+'),
-            num: 7
+            num: count
         }, function(err, response) {
             if (err) fail(err);
             else {

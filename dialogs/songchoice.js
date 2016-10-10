@@ -64,23 +64,30 @@ function endDialogWithError(session, err, msg) {
 module.exports = new builder.SimpleDialog(
     function (session, args) {
         if (args.childId === 'BotBuilder:Prompts'){
-            if (args.response){
-                if (session.dialogData.foundSong){
-                    session.send(generateCardMessage(session, [session.dialogData.foundSong]));
-                }
-                setTimeout(function () {
-                    endDialogWithSuccess(session, 'Super!!!');
-                }, 0);
+            if (args.resumed === builder.ResumeReason.completed){
+                if (args.response){
+                    if (session.dialogData.foundSong){
+                        session.send(generateCardMessage(session, [session.dialogData.foundSong]));
+                    }
+                    setTimeout(function () {
+                        endDialogWithSuccess(session, 'Super!!!');
+                    }, 0);
 
+                }
+                else{
+                    session.replaceDialog("/songchoice", {
+                        songs:session.dialogData.songs,
+                        foundSong: session.dialogData.foundSong
+                    });
+                }
             }
             else{
-                session.replaceDialog("/songchoice", {
-                    songs:session.dialogData.songs,
-                    foundSong: session.dialogData.foundSong
-                });
+                session.reset('/');
+                return;
             }
         }
         else {
+
             if (args.songs && args.songs.length){
                 if (args.foundSong){
                     session.dialogData.foundSong = args.foundSong;
@@ -105,6 +112,7 @@ module.exports = new builder.SimpleDialog(
                         });
                 }
                 else{
+                    console.log(args.songs);
                     session.dialogData.songs = args.songs.slice(1);
 
                     var songInfo = args.songs[0];
@@ -116,7 +124,9 @@ module.exports = new builder.SimpleDialog(
 
                                 session.send(generatePreviewMessage(session, song));
 
-                                builder.Prompts.confirm(session, "Am I right??");
+                                builder.Prompts.confirm(session, "Am I right??", {
+                                    maxRetries: 0
+                                });
                             }
                             else{
                                 session.replaceDialog("/songchoice", {
