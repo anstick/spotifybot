@@ -11,11 +11,16 @@
   "dependencies": {
     "botbuilder": "^3.2.3",
     "cheerio": "^0.22.0",
-    "google-search": "0.0.4",
+    "fluent-ffmpeg": "^2.1.0",
+    "https": "^1.0.0",
+    "node-uuid": "^1.4.7",
     "promise": "^7.1.1",
     "requests": "^0.1.7",
     "require-tree": "^1.1.1",
     "restify": "^4.1.1",
-    "spotify-web-api-node": "^2.3.5"
+    "spotify-web-api-node": "^2.3.5",
+    "temp": "^0.8.3",
+    "underscore": "^1.8.3",
+    "url": "^0.11.0"
   }
 }

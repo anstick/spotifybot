@@ -20,17 +20,19 @@ function generateCardMessage(session, songs) {
                 .subtitle(song.artist)
                 .images([
                     builder.CardImage.create(session, song.cover)
-                ]);
+                ])
+                .tap(builder.CardAction.openUrl(session, song.url, 'Listen on Spotify')
+            );
 
             if (arr.length>1){
                 card.buttons([
                     builder.CardAction.playAudio(session, song.preview_url, 'Preview'),
                     builder.CardAction.openUrl(session, song.url, 'Listen on Spotify')
-                ])
+                ]);
             }else{
                 card.buttons([
                     builder.CardAction.openUrl(session, song.url, 'Listen on Spotify')
-                ])
+                ]);
             }
             return card;
         });
@@ -85,7 +87,7 @@ module.exports = new builder.SimpleDialog(
                     session.dialogData.foundSong = args.foundSong;
                     session.dialogData.urls = args.urls.slice(3);
 
-                    session.send('Hmm. Let me thing a little bit more!');
+                    session.send('Hmm. Let me think a little bit more!');
                     
                     Promise.all(args.urls.slice(0,2).map(
                         function (url) {

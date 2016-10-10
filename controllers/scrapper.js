@@ -1,5 +1,6 @@
-var request = require('request');
-var cheerio = require('cheerio');
+var request     =   require('request');
+var cheerio     =   require('cheerio');
+var Promise     =   require('promise');
 
 exports.scrape = function (url) {
   return new Promise(function (done, fail) {

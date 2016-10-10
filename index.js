@@ -17,7 +17,6 @@ var bot = new builder.UniversalBot(provider.connector);
 provider.onConnect(bot);
 
 
-
 //=========================================================
 // Bots Dialogs
 //=========================================================
