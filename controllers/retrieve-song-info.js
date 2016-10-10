@@ -7,8 +7,9 @@ var spotifyApi = new SpotifyWebApi();
 module.exports.search = function (artist, song) {
   return new Promise(function (done, fail) {
       spotifyApi
-          .searchTracks("track:" +song+" artist:"+artist,{
-            limit:1
+          .searchTracks("track:" +song.toLowerCase()+" artist:"+artist.toLowerCase(),{
+                limit:1,
+                market:'SE'
           })
           .then(function(data) {
               if (data.body.tracks){
@@ -22,8 +23,7 @@ module.exports.search = function (artist, song) {
                               track.artists[0].name,
                               track.album.images && track.album.images.length? track.album.images[0].url: null,
                               'http://open.spotify.com/track/' + track.uri.split(':')[2],
-                              track.preview_url,
-                              track
+                              track.preview_url
                           );
                           done(song);
                       }

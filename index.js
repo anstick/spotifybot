@@ -1,8 +1,13 @@
-var builder = require('botbuilder');
-var requireTree = require('require-tree');
-var providers = requireTree('./providers');
-var dialogs = requireTree('./dialogs');
+/*jslint node: true */
+"use strict";
 
+const builder = require('botbuilder');
+const requireTree = require('require-tree');
+const providers = requireTree('./providers');
+const dialogs = requireTree('./dialogs');
+const winston = require('winston');
+
+winston.level = process.env.LOG_LEVEL || 'error';
 
 var provider;
 switch(process.env.PROVIDER){

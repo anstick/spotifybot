@@ -1,10 +1,9 @@
 var builder = require('botbuilder');
 var RetrieveSongInfoController = require('../controllers/retrieve-song-info');
-
+var winston = require('winston');
 
 function generatePreviewMessage(session, song) {
     return new builder.Message(session)
-        .text(song.artist + ' - ' + song.title)
         .attachments([{
             contentType: "audio/mpeg",
             contentUrl: song.preview_url
@@ -42,6 +41,9 @@ function generateCardMessage(session, songs) {
 }
 
 function endDialogWithSuccess(session, msg) {
+    winston.log('debug', 'SONG_CHOICE_DIALOG: endDialogWithSuccess', {
+        msg: msg || true
+    });
     session.endDialogWithResult({
         resumed: builder.ResumeReason.completed,
         response: msg || true
@@ -49,6 +51,11 @@ function endDialogWithSuccess(session, msg) {
 }
 
 function endDialogWithError(session, err, msg) {
+    winston.log('debug', 'SONG_CHOICE_DIALOG: endDialogWithError', {
+        msg: msg || null,
+        err: err
+    });
+
     var result = {
         resumed: builder.ResumeReason.notCompleted,
         error: err
@@ -67,14 +74,22 @@ module.exports = new builder.SimpleDialog(
             if (args.resumed === builder.ResumeReason.completed){
                 if (args.response){
                     if (session.dialogData.foundSong){
-                        session.send(generateCardMessage(session, [session.dialogData.foundSong]));
-                    }
-                    setTimeout(function () {
-                        endDialogWithSuccess(session, 'Super!!!');
-                    }, 0);
+                        winston.log('debug', 'SONG_CHOICE_DIALOG: Song was right', {
+                            song: session.dialogData.foundSong
+                        });
 
+                        setTimeout(function () {
+                            endDialogWithSuccess(session, 'Super!!!');
+                        }, 0);
+                    }
+                    else{
+                        endDialogWithError(session, null, new Error('session.dialogData.foundSong cannot be null'));
+                    }
                 }
                 else{
+                    winston.log('debug', 'SONG_CHOICE_DIALOG: Song wasn\'t right. Restart dialog', {
+                        song: session.dialogData.foundSong
+                    });
                     session.replaceDialog("/songchoice", {
                         songs:session.dialogData.songs,
                         foundSong: session.dialogData.foundSong
@@ -82,14 +97,18 @@ module.exports = new builder.SimpleDialog(
                 }
             }
             else{
+                winston.log('debug', 'SONG_CHOICE_DIALOG: User interruprt Confirm');
                 session.reset('/');
                 return;
             }
         }
         else {
-
+            winston.log('debug', 'SONG_CHOICE_DIALOG: Started with', args);
             if (args.songs && args.songs.length){
                 if (args.foundSong){
+                    winston.log('debug', 'SONG_CHOICE_DIALOG: Song wasn\'t right', {
+                        song: args.foundSong
+                    });
                     session.dialogData.foundSong = args.foundSong;
                     session.dialogData.songs = args.songs.slice(3);
 
@@ -101,6 +120,9 @@ module.exports = new builder.SimpleDialog(
                                 .search(song.artist, song.title);
                         }))
                         .then(function (songs) {
+                            winston.log('debug', 'SONG_CHOICE_DIALOG: RetrieveSongInfoController results after', {
+                                songs: songs
+                            });
                             session.send(generateCardMessage(session,
                                 songs.filter(function (song) {
                                     return song;
@@ -112,23 +134,31 @@ module.exports = new builder.SimpleDialog(
                         });
                 }
                 else{
-                    console.log(args.songs);
                     session.dialogData.songs = args.songs.slice(1);
 
                     var songInfo = args.songs[0];
                     RetrieveSongInfoController
                         .search(songInfo.artist, songInfo.title)
                         .then(function (song) {
+                            winston.log('debug', 'SONG_CHOICE_DIALOG: RetrieveSongInfoController result', {
+                                result: song
+                            });
                             if (song){
                                 session.dialogData.foundSong = song;
 
+                                session.send(generateCardMessage(session, [session.dialogData.foundSong]));
                                 session.send(generatePreviewMessage(session, song));
-
-                                builder.Prompts.confirm(session, "Am I right??", {
-                                    maxRetries: 0
-                                });
+                                session.sendTyping();
+                                setTimeout(function () {
+                                    builder.Prompts.confirm(session, "Am I right??", {
+                                        maxRetries: 0
+                                    });
+                                }, 200);
                             }
                             else{
+                                winston.log('debug', 'SONG_CHOICE_DIALOG: Restart dialog', {
+                                    songs: session.dialogData.songs
+                                });
                                 session.replaceDialog("/songchoice", {
                                     songs: session.dialogData.songs
                                 });
