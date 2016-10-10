@@ -1,6 +1,5 @@
 var builder = require('botbuilder');
-var Scrapper = require('../controllers/scrapper');
-var SpotifyAPI = require('../controllers/spotify-search');
+var RetrieveSongInfoController = require('../controllers/retrieve-song-info');
 
 
 function generatePreviewMessage(session, song) {
@@ -76,29 +75,23 @@ module.exports = new builder.SimpleDialog(
             }
             else{
                 session.replaceDialog("/songchoice", {
-                    urls:session.dialogData.urls,
+                    songs:session.dialogData.songs,
                     foundSong: session.dialogData.foundSong
                 });
             }
         }
         else {
-            if (args.urls && args.urls.length){
+            if (args.songs && args.songs.length){
                 if (args.foundSong){
                     session.dialogData.foundSong = args.foundSong;
-                    session.dialogData.urls = args.urls.slice(3);
+                    session.dialogData.songs = args.songs.slice(3);
 
                     session.send('Hmm. Let me think a little bit more!');
                     
-                    Promise.all(args.urls.slice(0,2).map(
-                        function (url) {
-                            return Scrapper.scrape(url)
-                                .then(function (songInfo) {
-                                    return SpotifyAPI
-                                        .search(songInfo.artist, songInfo.title);
-                                })
-                                .catch(function (err) {
-                                    return Promise.resolve(null);
-                                })
+                    Promise.all(args.songs.slice(0,2).map(
+                        function (song) {
+                            return RetrieveSongInfoController
+                                .search(song.artist, song.title);
                         }))
                         .then(function (songs) {
                             session.send(generateCardMessage(session,
@@ -112,40 +105,32 @@ module.exports = new builder.SimpleDialog(
                         });
                 }
                 else{
-                    session.dialogData.urls = args.urls.slice(1);
+                    session.dialogData.songs = args.songs.slice(1);
 
-                    Scrapper.scrape(args.urls[0])
-                        .then(function (songInfo) {
-                            if (songInfo) {
-                                return SpotifyAPI
-                                    .search(songInfo.artist, songInfo.title)
-                                    .then(function (song) {
-                                        if (song){
-                                            session.dialogData.foundSong = song;
-                                            session.send(generatePreviewMessage(session, session.dialogData.foundSong));
+                    var songInfo = args.songs[0];
+                    RetrieveSongInfoController
+                        .search(songInfo.artist, songInfo.title)
+                        .then(function (song) {
+                            if (song){
+                                session.dialogData.foundSong = song;
 
-                                            builder.Prompts.confirm(session, "Am I right??");
-                                        }
-                                        else{
-                                            session.replaceDialog("/songchoice", {
-                                                urls:session.dialogData.urls
-                                            });
-                                        }
-                                    });
+                                session.send(generatePreviewMessage(session, song));
+
+                                builder.Prompts.confirm(session, "Am I right??");
                             }
-                            else {
-                                endDialogWithError(session, new Error('Page can\'t be parsed'));
+                            else{
+                                session.replaceDialog("/songchoice", {
+                                    songs: session.dialogData.songs
+                                });
                             }
                         })
                         .catch(function (err) {
-                            endDialogWithError(session,
-                                err,
-                                "Parsing error or no song in Spotify");
+                            endDialogWithError(session, err, "No song in Spotify");
                         });
                 }
 
             } else{
-                endDialogWithError(session, new Error('No urls to show'));
+                endDialogWithError(session, new Error('No songs to show'));
             }
         }
     }

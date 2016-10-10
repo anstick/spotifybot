@@ -1,5 +1,4 @@
-var Scrapper = require('../controllers/scrapper');
-var GoogleSearch = require('../controllers/google-search');
+var SearchSongController = require('../controllers/search-song');
 var SpeechRecognizer = require('../controllers/speech-recognizer');
 var builder = require('botbuilder');
 
@@ -44,13 +43,12 @@ module.exports = [
         console.log("Searching for: " + session.dialogData.userText);
         session.send('Give me a second...');
 
-        GoogleSearch
+        SearchSongController
             .search(session.dialogData.userText)
-            .then(function (urls) {
-                if (urls && urls.length){
-                    session.dialogData.possibleUrls = urls;
+            .then(function (songs) {
+                if (songs && songs.length){
                     session.beginDialog('/songchoice', {
-                        urls: session.dialogData.possibleUrls
+                        songs: songs
                     });
                 }else{
                     next();
