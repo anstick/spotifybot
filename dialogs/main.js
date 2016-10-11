@@ -1,4 +1,4 @@
-var SearchSongController = require('../controllers/search-song');
+var SearchSongController = require('../controllers/experiments/search-song-genius');
 var SpeechRecognizer = require('../controllers/speech-recognizer');
 var builder = require('botbuilder');
 var winston = require('winston');
@@ -63,7 +63,7 @@ module.exports = [
         winston.log('info', "MAIN_DIALOG: Searching for: " + session.dialogData.userText);
 
         SearchSongController
-            .search(session.dialogData.userText)
+            .search(session.dialogData.userText, 10)
             .then(function (songs) {
                 winston.log('debug', "MAIN_DIALOG: SearchSongController results", {
                     results: songs
