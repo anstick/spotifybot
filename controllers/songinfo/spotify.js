@@ -1,5 +1,5 @@
 var SpotifyWebApi   =   require('spotify-web-api-node');
-var Song            =   require('../models/song');
+var Song            =   require('../../models/song');
 var Promise         =   require('promise');
 
 var spotifyApi = new SpotifyWebApi();

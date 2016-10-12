@@ -9,10 +9,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/speech": "^0.2.0",
     "botbuilder": "^3.2.3",
     "cheerio": "^0.22.0",
     "fluent-ffmpeg": "^2.1.0",
+    "google": "^2.1.0",
     "https": "^1.0.0",
+    "musicmatch": "^0.2.5",
     "node-genius": "^1.1.0",
     "node-uuid": "^1.4.7",
     "promise": "^7.1.1",

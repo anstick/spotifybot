@@ -1,8 +1,12 @@
-var SearchSongController = require('../controllers/experiments/search-song-genius');
-var SpeechRecognizer = require('../controllers/speech-recognizer');
-var builder = require('botbuilder');
-var winston = require('winston');
+var _                       =   require('underscore');
+var builder                 =   require('botbuilder');
+var winston                 =   require('winston');
+var Dict                    =   require('../dictionary');
+var SpeechRecognizer        =   require('../controllers/speech/google-cloud-speech');
 
+var SearchSongController1   =   require('../controllers/search/genius');
+var SearchSongController2   =   require('../controllers/search/google');
+var SearchSongController3   =   require('../controllers/search/musixmatch');
 
 function endDialog(session, message, err) {
     var params = {};
@@ -10,86 +14,112 @@ function endDialog(session, message, err) {
         params.err = err;
     }
 
-
     winston.log('debug', 'MAIN_DIALOG: FINISH DIALOG', params);
-    session.endDialog(message? message: "Tell me lyrics and I tell you what song it is.")
+
+    if (message){
+        session.send(message);
+    }
+
+    session.endDialog(Dict.getRandomValue("start"));
 }
 
 module.exports = [
     function (session, args, next) {
         var msg = session.message;
-        session.send('Please bear with me for a moment...');
-        session.sendTyping();
-        if (session.message.attachments && session.message.attachments.length){
-            console.log(session.message.attachments);
+
+        session.dialogData.soundText = null;
+        if (session.message.attachments && session.message.attachments.length) {
             var sounds = session.message.attachments.filter(function (element) {
-                return ['audio/ogg','video/mp4'].indexOf(element.contentType) !== -1;
+                return ['audio/ogg', 'video/mp4'].indexOf(element.contentType) !== -1;
             });
 
-            if (sounds && sounds.length){
-                winston.log('debug', 'MAIN_DIALOG: Send sound '+  sounds[0].contentUrl);
+            if (sounds && sounds.length) {
+                winston.log('debug', 'MAIN_DIALOG: Send sound ' + sounds[0].contentUrl);
+
+                session.send(Dict.getRandomValue('incoming_sound') + "\n" + Dict.getRandomValue('waiting'));
+
                 SpeechRecognizer.recognize(sounds[0].contentUrl)
-                   .then(function (text) {
-                        winston.log('debug', 'MAIN_DIALOG: Sound text: '+  text);
-                        session.dialogData.userText = text;
+                    .then(function (text) {
+                        if (!text){
+                            throw new Error('Empty text from recogniser');
+                        }
+                        winston.log('debug', 'MAIN_DIALOG: Sound text: ' + text);
+                        session.dialogData.soundText = text;
                         next();
                     })
                     .catch(function (err) {
-                       endDialog(session,'Wat? I can\'t hear you. Could you please repeat?', err);
+                        endDialog(session, Dict.getRandomValue('sound_recognition_failed'), err);
                     });
+                return;
             }
-            else{
-                next();
-            }
-        }
-        else{
-            next();
-        }
-    },
-    function (session, text, next) {
-        if (!session.dialogData.userText){
-            winston.log('debug', 'MAIN_DIALOG: Use text from message: '+  session.message.text);
-            session.dialogData.userText = session.message.text;
         }
 
-        if (!session.dialogData.userText || session.dialogData.userText.split(" ").length < 3){
-            session.send('It doesn\'t look like a text from the song');
-            endDialog(session, null, new Error('Can\'t parse text:' + session.dialogData.userText));
-            return;
-        }
+        session.send(Dict.getRandomValue('waiting'));
+        session.sendTyping();
         next();
     },
-    function (session, _, next) {
+    function (session, ___, next) {
+
+        var text = session.dialogData.soundText || session.message.text;
+
+        if (!session.dialogData.soundText){
+            winston.log('debug', 'MAIN_DIALOG: Use text from message: '+  text);
+        }
+
+        if (!text || text.split(" ").length < 3){
+            session.send(Dict.getRandomValue('invalid_text'));
+            endDialog(session, null, new Error('Can\'t parse text:' + text));
+            return;
+        }
+
+        session.dialogData.userText = text;
+        next();
+    },
+
+    function (session, ___, next) {
         winston.log('info', "MAIN_DIALOG: Searching for: " + session.dialogData.userText);
 
-        SearchSongController
-            .search(session.dialogData.userText, 10)
-            .then(function (songs) {
-                winston.log('debug', "MAIN_DIALOG: SearchSongController results", {
-                    results: songs
-                });
-
-                if (songs && songs.length){
-                    session.beginDialog('/songchoice', {
-                        songs: songs
-                    });
-                }else{
-                    next();
-                }
-            })
-            .catch(function (err) {
-                endDialog(session, 'Sorry, I\'m too tired for today. Could you please come back tomorrow?', err);
+        Promise.all([
+            SearchSongController1,
+            SearchSongController2,
+            SearchSongController3
+        ].map(function (controller) {
+            return controller.search(session.dialogData.userText, 1)
+        }))
+        .then(function (songs) {
+            winston.log('debug', "MAIN_DIALOG: SearchSongController results", {
+                results: songs
             });
+
+            var array = _.flatten(songs);
+
+            if (array && array.length){
+                array = _.uniq(array, false, function (el) {
+                    console.log(el);
+                    return el.artist.toLowerCase().replace(" ", '')+el.title.toLowerCase().replace(" ", "");
+                });
+                session.beginDialog('/songchoice', {
+                    songs: array
+                });
+            }else{
+                next();
+            }
+        });
+
     },
     function (session, results) {
-        if (results && results.response){
-            if (typeof results.response == 'string'){
-                session.send(results.response);
-            }
+
+        if (results && results.resumed === builder.ResumeReason.completed ){
+            winston.log('debug', 'MAIN_DIALOG: Search success');
+            session.send(Dict.getRandomValue('positive_result'));
         }else{
-            winston.log('debug', "MAIN_DIALOG: Search failed");
-            session.send("I have no idea what song can it be...");
+            winston.log('debug', "MAIN_DIALOG: Search failed. " + results.message, {
+                err: results.error
+            });
+
+            session.send(Dict.getRandomValue('negative_result'));
         }
+
         endDialog(session);
     }
 ];

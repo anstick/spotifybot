@@ -1,7 +1,10 @@
 'use strict';
-const https = require('https');
-const _ = require('underscore');
-const url = require('url');
+var Promise     =   require('promise');
+var Scrapper    =   require('../scrapper/azlyrics');
+var winston     =   require('winston');
+var https       =   require('https');
+var _           =   require('underscore');
+var url         =   require('url');
 
 var GoogleSearch = function(options) {
     if (!options) options = {};
@@ -72,4 +75,40 @@ GoogleSearch.prototype._doRequest = function(requestQuery, callback) {
     });
 };
 
-module.exports = GoogleSearch;
+var googleSearch = new GoogleSearch({
+    key: process.env.GOOGLE_API_KEY,
+    cx: process.env.GOOGLE_CUSTOM_SEARCH_CX
+});
+
+exports.search = function (query, count) {
+    var count = count || 5;
+    winston.log('debug', 'GOOGLE_SEARCH_CONTROLLER start', {
+        query: query,
+        count: count
+    });
+    return new Promise(function (done, fail) {
+        googleSearch.build({
+            q: query,
+            num: count
+        }, function(err, response) {
+            if (err) done(Promise.resolve([]));
+            else {
+                if (response.error){
+                    done(Promise.resolve([]));
+                }else{
+                    winston.log('debug', 'GOOGLE_SEARCH_CONTROLLER results', {
+                        results: response.items
+                    });
+                    if (response.items && response.items.length){
+                        done(Promise.all(response.items.map(function (item) {
+                            return Scrapper.scrape(item.link);
+                        })));
+                    }
+                    else{
+                        done(Promise.resolve([]));
+                    }
+                }
+            }
+        });
+    });
+};

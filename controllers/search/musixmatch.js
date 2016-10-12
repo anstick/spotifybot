@@ -1,13 +1,13 @@
 var Promise =   require('promise');
 var MusicMatch = require('musicmatch');
-var FallbackSearchController = require('./../search-song');
 
 var music = new MusicMatch({
-        format:"json",
-        appid:"spotify-bot"
+    format:"json",
+    appid:"spotify-bot"
 });
+
 music.uri = "http://api.musixmatch.com/ws/1.1/";
-music._datas.apikey = "6995679de06e8e70a21b0c0a26c7d8fd";
+music._datas.apikey = process.env.MUSIXMATCH_API_KEY || "";
 
 exports.search = function (query, count) {
     var count = count || 5;
@@ -22,15 +22,18 @@ exports.search = function (query, count) {
             return Promise.all(data.message.body.track_list.map(function (el) {
                 return Promise.resolve({
                     artist: el.track.artist_name,
-                    title: el.track.track_name
+                    title: el.track.track_name,
+                    url: el.track.track_share_url
                 });
             }))
         })
         .then(function (results) {
             if (results && results.length){
                 return Promise.resolve(results);
-            }else{
-                return FallbackSearchController.search(query, count)
             }
+            return Promise.resolve([]);
+        }).
+        catch(function (err) {
+            return Promise.resolve([]);
         });
 };

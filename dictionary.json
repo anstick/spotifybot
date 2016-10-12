@@ -1,0 +1,42 @@
+{
+  "start":[
+    "Gimme a peace of lyrics 👂",
+    "Give me another lyrics. 👂",
+    "Wanna try more? Let's do it. Tell me something..."
+  ],
+  "incoming_sound": [
+      "That was sweet🤗"
+  ],
+  "sound_recognition_failed":[
+      "Couldn't recognize the song. Try again when you finish bathing.😉",
+      "Sorry, I'm not good in recognizing growling.🙄",
+      "What?.. I can't hear you. Could you please repeat?",
+      "Waaaaat?"
+  ],
+  "invalid_text":[
+      "Couldn't find the song. Have you just invented it?!",
+      "Whaat?",
+      "It doesn't seem like a song lyrics, does it?"
+  ],
+  "waiting":[
+    "Bear with me a moment. 🤔🕵"
+  ],
+  "am_i_right":[
+    "Am I right??"
+  ],
+  "positive_result":[
+    "Splendid!",
+    "💃",
+    "💪",
+    "👍",
+    "😎",
+    "Great!",
+    "Super!!!"
+  ],
+  "next_result_waiting":[
+    "Hmm.. Let me think a little bit.. 🤔"
+  ],
+  "negative_result":[
+    "I have no idea what song can it be..."
+  ]
+}

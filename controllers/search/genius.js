@@ -1,16 +1,16 @@
 var Genius                      =   require("node-genius");
 var geniusClient                =   new Genius(process.env.GENIUS_ACCESS_TOKEN);
-var FallbackSearchController    =   require('./../search-song');
+var FallbackSearchController    =   require('./google-cs');
 var Promise                     =   require('promise');
 var winston                     =   require('winston');
 
 exports.search = function (query, count) {
     var count = count || 5;
-    return new Promise(function (done, fail) {
+    return new Promise(function (done) {
         // Search Genius.
         geniusClient.search(query, function (error, results) {
             if (error){
-                fail(error);
+                done(Promise.resolve([]));
             }
             else{
                 try {
@@ -19,16 +19,17 @@ exports.search = function (query, count) {
                         throw new Error('status ' + json.meta.status);
                     }
                     if (json.response.hits && json.response.hits.length) {
-                        done(json.response.hits.filter(function (hit) {
+                        done(Promise.all(json.response.hits.filter(function (hit) {
                                     return hit.type === 'song';
                                 })
                                 .slice(0, count)
                                 .map(function (hit) {
-                                    return {
+                                    return Promise.resolve({
                                         artist: hit.result.primary_artist.name,
-                                        title: hit.result.title
-                                    };
-                                })
+                                        title: hit.result.title,
+                                        url: hit.result.url
+                                    });
+                                }))
                         );
                     }
                     else {
@@ -39,7 +40,7 @@ exports.search = function (query, count) {
                     winston.log('debug', "GENIUS_SEARCH_CONTROLLER: Error", {
                         err: error
                     });
-                    done(FallbackSearchController.search(query,count))
+                    done(Promise.resolve([]));
                 }
             }
         });
