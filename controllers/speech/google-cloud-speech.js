@@ -4,10 +4,25 @@ var uuid        =   require('node-uuid');
 var ffmpeg      =   require('fluent-ffmpeg');
 var temp        =   require('temp').track();
 var Promise     =   require('promise');
-var speech      =   require('@google-cloud/speech')();
+var speechCloud =   require('@google-cloud/speech');
 var winston     =   require('winston');
 
 const TAG = "GOOGLE_CLOUD_SPEECH: ";
+
+var opts = {
+    projectId: process.env.GCLOUD_PROJECT
+};
+
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS_CONTENT){
+    opts.credentials = JSON.parse(new Buffer(process.env.GOOGLE_APPLICATION_CREDENTIALS_CONTENT, 'base64'));
+}
+else{
+    if (process.env.GOOGLE_APPLICATION_CREDENTIALS){
+        opts.keyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    }
+}
+
+var speech = speechCloud(opts);
 
 function parseFile(filename) {
     return new Promise(function (done, fail) {
