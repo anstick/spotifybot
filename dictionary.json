@@ -15,7 +15,7 @@
   ],
   "invalid_text":[
       "Couldn't find the song. Have you just invented it?!",
-      "Whaat?",
+      "Whaat? I did understand nothing!",
       "It doesn't seem like a song lyrics, does it?"
   ],
   "waiting":[
@@ -28,8 +28,7 @@
     "Spinning the wheel of fortune",
     "Go ahead -- hold your breath",
     "Testing data on Timmy... ... ... We're going to need another Timmy.",
-    "Warming up the processors...",
-    "Are you reeeeaaaady?..."
+    "Warming up the processors..."
   ],
   "am_i_right":[
     "Am I right??"
