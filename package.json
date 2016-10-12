@@ -1,13 +1,8 @@
 {
   "name": "spotifybot",
-  "version": "0.1.0",
-  "description": "Spotify recomendations bot",
+  "version": "1.0.0",
+  "description": "Turns your signing into Spotify session.",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@google-cloud/speech": "^0.2.0",
     "botbuilder": "^3.2.3",
@@ -27,5 +22,19 @@
     "underscore": "^1.8.3",
     "url": "^0.11.0",
     "winston": "^2.2.0"
-  }
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anstick/spotifybot.git"
+  },
+  "author": "anstick",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anstick/spotifybot/issues"
+  },
+  "homepage": "https://github.com/anstick/spotifybot#readme"
 }
