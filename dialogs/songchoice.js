@@ -63,7 +63,6 @@ module.exports = new builder.SimpleDialog(
         session.dialogData.songs = args.songs.slice(1);
         if (args.foundSong){
             session.send(Dict.getRandomValue("next_result_waiting"));
-            session.sendTyping();
         }
 
         var songInfo = args.songs[0];

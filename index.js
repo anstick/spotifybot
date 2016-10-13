@@ -20,7 +20,11 @@ switch(process.env.PROVIDER){
         provider = new providers.console();
 }
 
-var bot = new builder.UniversalBot(provider.connector);
+var bot = new builder.UniversalBot(provider.connector,{
+    localizerSettings: {
+        botLocalePath: "./locale", defaultLocale: "en"
+    }
+});
 provider.onConnect(bot);
 
 

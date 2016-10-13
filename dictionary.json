@@ -5,7 +5,7 @@
     "Wanna try more? Let's do it. Tell me something..."
   ],
   "incoming_sound": [
-      "That was sweet🤗"
+      "That was sweet🤗 Bear with me for a moment. 🤔🕵"
   ],
   "sound_recognition_failed":[
       "Couldn't recognize the song. Try again when you finish bathing.😉",
@@ -20,14 +20,10 @@
   ],
   "waiting":[
     "Bear with me for a moment. 🤔🕵",
-    "Warming up Large Hadron Collider...",
-    "RE-calibrating the internet...",
+    "Hold on! Warming up Large Hadron Collider...",
+    "Just a second. RE-calibrating the internet...",
     "The bits are flowing so slowly today",
-    "Listening to the sound of the human nature...",
-    "Please, hold your breath and start praying",
     "Spinning the wheel of fortune",
-    "Go ahead -- hold your breath",
-    "Testing data on Timmy... ... ... We're going to need another Timmy.",
     "Warming up the processors..."
   ],
   "am_i_right":[
@@ -46,6 +42,6 @@
     "Hmm.. Let me think a little bit.. 🤔"
   ],
   "negative_result":[
-    "I have no idea what song can it be..."
+    "Sorry. I have no idea what song can it be =("
   ]
 }

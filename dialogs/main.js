@@ -36,7 +36,7 @@ module.exports = [
             if (sounds && sounds.length) {
                 winston.log('debug', 'MAIN_DIALOG: Send sound ' + sounds[0].contentUrl);
 
-                session.send(Dict.getRandomValue('incoming_sound') + "\n" + Dict.getRandomValue('waiting'));
+                session.send(Dict.getRandomValue('incoming_sound'));
 
                 SpeechRecognizer.recognize(sounds[0].contentUrl)
                     .then(function (text) {
@@ -54,8 +54,6 @@ module.exports = [
             }
         }
 
-        session.send(Dict.getRandomValue('waiting'));
-        session.sendTyping();
         next();
     },
     function (session, ___, next) {
@@ -70,6 +68,10 @@ module.exports = [
             session.send(Dict.getRandomValue('invalid_text'));
             endDialog(session, null, new Error('Can\'t parse text:' + text));
             return;
+        }
+
+        if (!session.dialogData.soundText){
+            session.send(Dict.getRandomValue('waiting'));
         }
 
         session.dialogData.userText = text;
