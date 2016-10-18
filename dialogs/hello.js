@@ -4,8 +4,8 @@ var Dict    =   require('../dictionary');
 module.exports = function (session, args, next) {
     // Send a greeting and show help.
     var card = new builder.HeroCard(session)
-        .title("Microsoft Bot Framework")
-        .text("Turns your signing into Spotify session.")
+        .title("Lyrics2Spotify Bot")
+        .text("Turns lyrics into Spotify sessions.")
         .images([
             builder.CardImage.create(session, "http://docs.botframework.com/images/demo_bot_image.png")
         ]);

@@ -23,6 +23,7 @@ exports.search = function (query, count) {
                 return Promise.resolve({
                     artist: el.track.artist_name,
                     title: el.track.track_name,
+                    coincidence: 0.5,
                     url: el.track.track_share_url
                 });
             }))

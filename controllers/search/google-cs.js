@@ -5,6 +5,7 @@ var winston     =   require('winston');
 var https       =   require('https');
 var _           =   require('underscore');
 var url         =   require('url');
+var utils       =   require('../../utils/search');
 
 var GoogleSearch = function(options) {
     if (!options) options = {};
@@ -82,7 +83,7 @@ var googleSearch = new GoogleSearch({
 
 exports.search = function (query, count) {
     var count = count || 5;
-    winston.log('debug', 'GOOGLE_SEARCH_CONTROLLER start', {
+    winston.log('debug', 'GOOGLE_CS_SEARCH_CONTROLLER start', {
         query: query,
         count: count
     });
@@ -100,8 +101,11 @@ exports.search = function (query, count) {
                         results: response.items
                     });
                     if (response.items && response.items.length){
-                        done(Promise.all(response.items.map(function (item) {
-                            return Scrapper.scrape(item.link);
+                        done(Promise.resolve(response.items.map(function (item) {
+                            return {
+                                url:item.link,
+                                coincidence: utils.coincidence(query, item.snippet)
+                            }
                         })));
                     }
                     else{

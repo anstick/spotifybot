@@ -7,6 +7,9 @@
   "incoming_sound": [
       "That was sweet🤗 Bear with me for a moment. 🤔🕵"
   ],
+  "sound_parsed": [
+    "That is what i heard: "
+  ],
   "sound_recognition_failed":[
       "Couldn't recognize the song. Try again when you finish bathing.😉",
       "Sorry, I'm not good in recognizing growling.🙄",

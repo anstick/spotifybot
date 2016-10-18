@@ -1,11 +1,9 @@
-/*jslint node: true */
-"use strict";
-
-const builder = require('botbuilder');
-const requireTree = require('require-tree');
-const providers = requireTree('./providers');
-const dialogs = requireTree('./dialogs');
-const winston = require('winston');
+var builder = require('botbuilder');
+var requireTree = require('require-tree');
+var providers = requireTree('./providers');
+var dialogs = requireTree('./dialogs');
+var middlewares = requireTree('./middlewares');
+var winston = require('winston');
 
 winston.level = process.env.LOG_LEVEL || 'error';
 winston.remove(winston.transports.Console);
@@ -22,7 +20,7 @@ switch(process.env.PROVIDER){
 
 var bot = new builder.UniversalBot(provider.connector,{
     localizerSettings: {
-        botLocalePath: "./locale", defaultLocale: "en"
+        botLocalePath: "./locale"
     }
 });
 provider.onConnect(bot);
@@ -31,28 +29,9 @@ provider.onConnect(bot);
 //=========================================================
 // Bots Dialogs
 //=========================================================
-bot.use({
-        botbuilder: function (session, next) {
-            if (session.message.text === '/hard_reset') {
-                console.log('restart');
-                session.perUserInConversationData = {};
-                session.userData = {};
-                session.conversationData = {};
-
-                if (!session.userData.firstRun) {
-                    session.userData.firstRun = true;
-                } else {
-                    session.reset('/');
-                }
-            }
-            else{
-                next();
-            }
-
-        }
-    }
-);
+bot.use(middlewares.hardreset);
 bot.use(builder.Middleware.firstRun({ version: 1.0, dialogId: '*:/hello' }));
+
 bot.dialog('/hello', dialogs.hello);
 bot.dialog('/', dialogs.main);
 bot.dialog('/songchoice', dialogs.songchoice);

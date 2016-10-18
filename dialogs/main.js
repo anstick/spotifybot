@@ -9,18 +9,21 @@ var SearchSongController2   =   require('../controllers/search/google');
 var SearchSongController3   =   require('../controllers/search/musixmatch');
 
 function endDialog(session, message, err) {
-    var params = {};
-    if (err){
-        params.err = err;
-    }
+    _.defer(function () {
 
-    winston.log('debug', 'MAIN_DIALOG: FINISH DIALOG', params);
+        var params = {};
+        if (err){
+            params.err = err;
+        }
 
-    if (message){
-        session.send(message);
-    }
+        winston.log('debug', 'MAIN_DIALOG: FINISH DIALOG', params);
 
-    session.endDialog(Dict.getRandomValue("start"));
+        if (message){
+            session.send(message);
+        }
+
+        session.endDialog(Dict.getRandomValue("start"));
+    });
 }
 
 module.exports = [
@@ -44,8 +47,12 @@ module.exports = [
                             throw new Error('Empty text from recogniser');
                         }
                         winston.log('debug', 'MAIN_DIALOG: Sound text: ' + text);
+
+                        session.send(Dict.getRandomValue('sound_parsed') + text);
                         session.dialogData.soundText = text;
-                        next();
+                        _.defer(function () {
+                            next();
+                        });
                     })
                     .catch(function (err) {
                         endDialog(session, Dict.getRandomValue('sound_recognition_failed'), err);
@@ -96,15 +103,20 @@ module.exports = [
             var array = _.flatten(songs);
 
             if (array && array.length){
-                array = _.uniq(array, false, function (el) {
-                    console.log(el);
+                array = _.uniq(_.sortBy(array, 'coincidence').reverse(), true , function (el) {
                     return el.artist.toLowerCase().replace(" ", '')+el.title.toLowerCase().replace(" ", "");
                 });
-                session.beginDialog('/songchoice', {
-                    songs: array
+                _.defer(function () {
+                    session.beginDialog('/songchoice', {
+                        songs: array
+                    });
                 });
+
             }else{
-                next();
+                _.defer(function () {
+                    next();
+                });
+
             }
         });
 

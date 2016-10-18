@@ -11,9 +11,13 @@ exports.scrape = function (url) {
           else{
               try{
                   var $ = cheerio.load(html);
+
+                  var artist = $('.lyricsh h2');
+                  var title =  $('.lyricsh').next().next();
+
                   done({
-                      artist: $('.lyricsh h2').text().replace(" LYRICS", ""),
-                      title: $('.lyricsh').next().next().text().replace(/^"(.*)"$/, '$1'),
+                      artist: artist.text().replace(" LYRICS", ""),
+                      title: title.text().replace(/^"(.*)"$/, '$1'),
                       url: url
                   });
               }
