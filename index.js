@@ -4,6 +4,7 @@ var providers = requireTree('./providers');
 var dialogs = requireTree('./dialogs');
 var middlewares = requireTree('./middlewares');
 var winston = require('winston');
+var path    =   require('path');
 
 winston.level = process.env.LOG_LEVEL || 'error';
 winston.remove(winston.transports.Console);
@@ -19,9 +20,9 @@ switch(process.env.PROVIDER){
 }
 
 var bot = new builder.UniversalBot(provider.connector,{
-    // localizerSettings: {
-    //     botLocalePath: "./locale"
-    // }
+    localizerSettings: {
+        botLocalePath: path.resolve(__dirname, "locale")
+    }
 });
 provider.onConnect(bot);
 

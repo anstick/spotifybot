@@ -1,4 +1,3 @@
-'use strict';
 var Promise     =   require('promise');
 var Scrapper    =   require('../scrapper/azlyrics');
 var winston     =   require('winston');
