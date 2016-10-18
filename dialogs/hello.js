@@ -5,13 +5,14 @@ module.exports = function (session, args, next) {
     // Send a greeting and show help.
     var card = new builder.HeroCard(session)
         .title("Lyrics2Spotify Bot")
-        .text("Turns lyrics into Spotify sessions.")
+        .text("Turns lyrics into Spotify sessions")
         .images([
-            builder.CardImage.create(session, "http://docs.botframework.com/images/demo_bot_image.png")
+            builder.CardImage.create(session, "https://dl.dropboxusercontent.com/u/11861026/logo.jpg")
         ]);
     var msg = new builder.Message(session).attachments([card]);
     session.send(msg);
-    session.send("Hi... TEXT");
-
-    session.endDialog(Dict.getValues('start')[0]);
+    session.send("Hi there!");
+    session.send("How often do you struggle to recall the song knowing only a few words from the chorus?");
+    session.send("I'm here to help you with this stuff. Just tell me some lyrics and I bet I'll guess what song it is.");
+    session.endDialog();
 };
