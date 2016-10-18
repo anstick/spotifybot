@@ -1,7 +1,7 @@
 var _                       =   require('underscore');
 var builder                 =   require('botbuilder');
 var winston                 =   require('winston');
-var Dict                    =   require('../dictionary');
+var Dict                    =   require('../locale/dictionary');
 var SpeechRecognizer        =   require('../controllers/speech/google-cloud-speech');
 
 var SearchSongController1   =   require('../controllers/search/genius');
@@ -40,6 +40,7 @@ module.exports = [
                 winston.log('debug', 'MAIN_DIALOG: Send sound ' + sounds[0].contentUrl);
 
                 session.send(Dict.getRandomValue('incoming_sound'));
+                session.send(Dict.getRandomValue('parsing_sound'));
 
                 SpeechRecognizer.recognize(sounds[0].contentUrl)
                     .then(function (text) {
@@ -48,10 +49,11 @@ module.exports = [
                         }
                         winston.log('debug', 'MAIN_DIALOG: Sound text: ' + text);
 
-                        session.send(Dict.getRandomValue('sound_parsed') + text);
-                        session.dialogData.soundText = text;
                         _.defer(function () {
-                            next();
+                            session.send(Dict.getRandomValue('sound_parsed') + text);
+                            session.dialogData.soundText = text;
+                            builder.Prompts.confirm(session, 'Is it correct?');
+
                         });
                     })
                     .catch(function (err) {
@@ -63,25 +65,32 @@ module.exports = [
 
         next();
     },
-    function (session, ___, next) {
-
-        var text = session.dialogData.soundText || session.message.text;
-
-        if (!session.dialogData.soundText){
-            winston.log('debug', 'MAIN_DIALOG: Use text from message: '+  text);
+    function (session, results, next) {
+      if (results && results.childId === 'BotBuilder:Prompts'){
+          if (results.response){
+              winston.log('debug', 'MAIN_DIALOG: Use text from sound: '+  session.dialogData.soundText);
+              session.dialogData.userText = session.dialogData.soundText;
+              next();
+          }
+          else{
+              endDialog(session,Dict.getRandomValue('sound_invalid'));
+          }
+      }else {
+          session.dialogData.userText = session.message.text;
+          next();
+      }
+    },
+    function (session, results, next) {
+        if (!session.dialogData.userText ){
+            endDialog(session, Dict.getRandomValue('invalid_text'), new Error('Can\'t parse text:' + session.dialogData.userText));
+            return;
         }
-
-        if (!text || text.split(" ").length < 3){
-            session.send(Dict.getRandomValue('invalid_text'));
-            endDialog(session, null, new Error('Can\'t parse text:' + text));
+        if (session.dialogData.userText.split(" ").length < 3){
+            endDialog(session, Dict.getRandomValue('text_too_short'));
             return;
         }
 
-        if (!session.dialogData.soundText){
-            session.send(Dict.getRandomValue('waiting'));
-        }
-
-        session.dialogData.userText = text;
+        session.send(Dict.getRandomValue('waiting'));
         next();
     },
 
@@ -121,7 +130,7 @@ module.exports = [
         });
 
     },
-    function (session, results) {
+    function (session, results, next) {
 
         if (results && results.resumed === builder.ResumeReason.completed ){
             winston.log('debug', 'MAIN_DIALOG: Search success');

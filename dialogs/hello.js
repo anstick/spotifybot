@@ -1,5 +1,5 @@
 var builder =   require('botbuilder');
-var Dict    =   require('../dictionary');
+var Dict    =   require('../locale/dictionary');
 
 module.exports = function (session, args, next) {
     // Send a greeting and show help.

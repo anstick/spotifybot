@@ -24,6 +24,12 @@ else{
 
 var speech = speechCloud(opts);
 
+function getFilesizeInBytes(filename) {
+    var stats = fs.statSync(filename);
+    var fileSizeInBytes = stats["size"];
+    return fileSizeInBytes
+}
+
 function parseFile(filename) {
     return new Promise(function (done, fail) {
         winston.log('debug', TAG + 'ffmpeg start');
@@ -41,7 +47,7 @@ function parseFile(filename) {
                     fail(err);
                 })
                 .on('end', function () {
-                    winston.log('debug', TAG + 'ffmpeg complete');
+                    winston.log('debug', TAG + 'ffmpeg complete filesize=' + (getFilesizeInBytes(output)/1000).toFixed(2) + 'kb');
                     done(output);
                 })
                 .input(filename)

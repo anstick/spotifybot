@@ -2,7 +2,7 @@ var builder                     = require('botbuilder');
 var RetrieveSongInfoController  = require('../controllers/songinfo/spotify');
 var winston                     = require('winston');
 var _                           =   require('underscore');
-var Dict                        =   require('../dictionary');
+var Dict                        =   require('../locale/dictionary');
 
 function endDialogWithError(session, err, msg) {
     winston.log('debug', 'SONG_CHOICE_DIALOG: endDialogWithError', {

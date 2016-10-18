@@ -1,7 +1,8 @@
-var fs  =   require('fs');
-var _   =   require('underscore');
+var fs      =   require('fs');
+var _       =   require('underscore');
+var path    =   require('path');
 
-const dict = JSON.parse(fs.readFileSync('dictionary.json', 'utf8'));
+const dict = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'dictionary.json'), 'utf8'));
 
 function getValues(key) {
     if (_.has(dict,key)){

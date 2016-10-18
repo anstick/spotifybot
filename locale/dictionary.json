@@ -1,0 +1,64 @@
+{
+  "start":[
+    "Gimme a piece of lyrics 👂",
+    "Give me another lyrics. 🗣",
+    "Wanna try more? Let's do it. Tell me something...✍"
+  ],
+  "incoming_sound": [
+    "That was sweet🤗 🎙",
+    "You sing like Adele 🎖🏆🎵",
+    "Awesome👏"
+  ],
+  "parsing_sound":[
+    "Wait a little while parsing sound 🎧",
+    "Just a moment. Processing... 📻"
+  ],
+  "sound_parsed": [
+    "That's what I heard: "
+  ],
+  "sound_invalid": [
+    "Sorry for that 🙁 You can try to use Siri or Google sound parse on your mobile or just write lyrics to me ✍"
+  ],
+  "sound_recognition_failed":[
+      "Couldn't recognize the song. Try again when you finish bathing.😉",
+      "Sorry, I'm not good in recognizing growling.🙄",
+      "What?.. I can't hear you. Could you please repeat?🖖",
+      "Waaaaat?🤖"
+  ],
+  "invalid_text":[
+      "Couldn't find the song. Have you just invented it?!👻👽",
+      "It doesn't seem like a song lyrics, does it?🕵"
+  ],
+  "text_too_short":[
+    "Text is to short to recognize. Could you probably recall other words from this song?👾"
+  ],
+  "waiting":[
+    "Bear with me for a moment. 🤔",
+    "Hold on! Warming up Large Hadron Collider...🔭🐵",
+    "Just a second. RE-calibrating the internet...☕🌍",
+    "Spinning the wheel of fortune..🙏🎲",
+    "Warming up the processors...⏳⚙"
+  ],
+  "am_i_right":[
+    "Am I right??🕵",
+    "Hit it?🎯"
+  ],
+  "positive_result":[
+    "💃",
+    "💪",
+    "👍",
+    "😎",
+    "🎳",
+    "Great!🤑",
+    "Super!!!🏄",
+    "Splendid! 👯"
+  ],
+  "next_result_waiting":[
+    "Hmm.. Let me think a little bit.. 🤔",
+    "Give me another chance.. 🤕"
+  ],
+  "negative_result":[
+      "👎 I have no idea what song can it be 😢",
+      "💩 No idea... At all.."
+  ]
+}
