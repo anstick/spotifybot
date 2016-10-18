@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "@google-cloud/speech": "^0.2.0",
-    "botbuilder": "^3.3.0",
+    "botbuilder": "3.3.2",
     "cheerio": "^0.22.0",
     "fluent-ffmpeg": "^2.1.0",
     "google": "^2.1.0",
