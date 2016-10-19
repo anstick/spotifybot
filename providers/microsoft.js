@@ -1,6 +1,7 @@
 var restify = require('restify');
 var builder = require('botbuilder');
-
+var fs      = require('fs');
+var path    = require('path');
 
 function MicrosoftProvider() {
     //=========================================================
@@ -25,6 +26,15 @@ function MicrosoftProvider() {
 
 MicrosoftProvider.prototype.onConnect = function () {
     this.server.post('/api/messages', this.connector.listen());
+    this.server.get('/policy', function (req, res, next) {
+        var body = fs.readFileSync(path.resolve(__dirname, '../privacypolicy.htm'), 'utf8');
+        res.writeHead(200, {
+            'Content-Length': Buffer.byteLength(body),
+            'Content-Type': 'text/html'
+        });
+        res.write(body);
+        res.end();
+    });
 };
 
 module.exports = MicrosoftProvider;
