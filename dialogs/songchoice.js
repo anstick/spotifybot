@@ -85,27 +85,86 @@ module.exports = new builder.SimpleDialog(
 
                 session.send('It is "%s" by %s', song.title, song.artist);
 
-                session.send(new builder.Message(session)
-                    .attachments([
-                        new builder.HeroCard(session)
-                            .title(song.title)
-                            .subtitle(song.artist)
-                            .images([
-                                builder.CardImage.create(session, song.cover)
-                            ])
-                            .tap(builder.CardAction.openUrl(session, song.url, 'Listen on Spotify'))
-                            .buttons([
-                                builder.CardAction.openUrl(session, songInfo.url, 'View lyrics'),
-                                builder.CardAction.openUrl(session, song.url, 'Listen on Spotify')
-                            ])
-                    ])
-                );
+                if (session.message.address.channelId === 'facebook'){
+                    session.send(new builder.Message(session).sourceEvent({
+                        facebook: {
+                            "notification_type": "PUSH",
+                            "attachment": {
+                                type: "template",
+                                payload: {
+                                    template_type: "generic",
+                                    elements: [{
+                                        title: song.title,
+                                        item_url: song.url,
+                                        image_url: song.cover,
+                                        subtitle: song.artist,
+                                        buttons: [
+                                            {
+                                                type: "web_url",
+                                                url: song.preview_url,
+                                                title: "Preview",
+                                                webview_height_ratio: 'compact'
+                                            },
+                                            {
+                                                type: "web_url",
+                                                url: songInfo.url,
+                                                title: "View lyrics",
+                                                webview_height_ratio: 'tall'
+                                            },
+                                            {
+                                                type: "web_url",
+                                                url: song.url,
+                                                title: "Listen on Spotify"
+                                            }
+                                        ]
+                                    }]
+                                }
+                            }
+                        }
+                    }));
+                }
+                else{
+                    session.send(new builder.Message(session)
+                        .attachments([
+                            new builder.HeroCard(session)
+                                .title(song.title)
+                                .subtitle(song.artist)
+                                .images([
+                                    builder.CardImage.create(session, song.cover)
+                                ])
+                                .tap(builder.CardAction.openUrl(session, song.url, 'Listen on Spotify'))
+                                .buttons([
+                                    builder.CardAction.playAudio(session, song.preview_url, 'Preview'),
+                                    builder.CardAction.openUrl(session, songInfo.url, 'View lyrics'),
+                                    builder.CardAction.openUrl(session, song.url, 'Listen on Spotify')
+                                ])
+                        ]));
+                }
+
+
 
                 session.send(new builder.Message(session)
-                    .attachments([{
-                        contentType: "audio/mpeg",
-                        contentUrl: song.preview_url
-                    }])
+                    .sourceEvent({
+                        facebook: {
+                            "notification_type" : "NO_PUSH",
+                            "attachment":{
+                                "type":"audio",
+                                "payload":{
+                                    "url": song.preview_url
+                                }
+                            }
+                        },
+                        telegram:{
+                            method: "sendAudio",
+                            parameters:{
+                                audio:{
+                                    "url": song.preview_url,
+                                    "mediaType": "audio/mpeg"
+                                },
+                                title: song.title + " by " + song.artist
+                            }
+                        }
+                    })
                 );
 
                 session.dialogData.foundSong = song;
