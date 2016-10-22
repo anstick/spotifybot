@@ -28,6 +28,10 @@ function endDialog(session, message, err) {
 
 module.exports = [
     function (session, args, next) {
+        winston.log('debug','Main started', {
+            args:args
+        });
+
         var msg = session.message;
 
         session.dialogData.soundText = null;
