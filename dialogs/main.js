@@ -34,6 +34,11 @@ module.exports = [
 
         var msg = session.message;
 
+        if (session.dialogData.soundText){
+            next();
+            return;
+        }
+
         session.dialogData.soundText = null;
         if (session.message.attachments && session.message.attachments.length) {
             var sounds = session.message.attachments.filter(function (element) {
@@ -53,36 +58,33 @@ module.exports = [
                         }
                         winston.log('debug', 'MAIN_DIALOG: Sound text: ' + text);
 
-                        _.defer(function () {
-                            session.send(Dict.getRandomValue('sound_parsed') + text);
-                            session.dialogData.soundText = text;
-                            builder.Prompts.confirm(session, 'Is it correct?');
+                        session.send(Dict.getRandomValue('sound_parsed') + text);
 
+                        _.defer(function () {
+                            session.dialogData.soundText = text;
+                            next();
                         });
                     })
                     .catch(function (err) {
                         endDialog(session, Dict.getRandomValue('sound_recognition_failed'), err);
                     });
                 return;
+            }else{
+                next();
             }
         }
-
-        next();
+        else{
+            next();
+        }
     },
     function (session, results, next) {
-      if (results && results.childId === 'BotBuilder:Prompts'){
-          if (results.response){
-              winston.log('debug', 'MAIN_DIALOG: Use text from sound: '+  session.dialogData.soundText);
-              session.dialogData.userText = session.dialogData.soundText;
-              next();
-          }
-          else{
-              endDialog(session,Dict.getRandomValue('sound_invalid'));
-          }
+      if (session.dialogData.soundText){
+          winston.log('debug', 'MAIN_DIALOG: Use text from sound: '+  session.dialogData.soundText);
+          session.dialogData.userText = session.dialogData.soundText;
       }else {
           session.dialogData.userText = session.message.text;
-          next();
       }
+      next();
     },
     function (session, results, next) {
         if (!session.dialogData.userText ){
