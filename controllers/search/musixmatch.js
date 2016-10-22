@@ -1,5 +1,6 @@
 var Promise =   require('promise');
 var MusicMatch = require('musicmatch');
+var winston =   require('winston');
 
 var music = new MusicMatch({
     format:"json",
@@ -11,6 +12,10 @@ music._datas.apikey = process.env.MUSIXMATCH_API_KEY || "";
 
 exports.search = function (query, count) {
     var count = count || 5;
+    winston.log('debug', 'MUSIX_CONTROLLER start', {
+        query: query,
+        count: count
+    });
     return music.trackSearch({
             page:1,
             page_size: count,
@@ -20,6 +25,7 @@ exports.search = function (query, count) {
         })
         .then(function(data){
             return Promise.all(data.message.body.track_list.map(function (el) {
+
                 return Promise.resolve({
                     artist: el.track.artist_name,
                     title: el.track.track_name,
@@ -30,11 +36,17 @@ exports.search = function (query, count) {
         })
         .then(function (results) {
             if (results && results.length){
+                winston.log('debug', 'MUSIX_CONTROLLER results', {
+                    results: results
+                });
                 return Promise.resolve(results);
             }
             return Promise.resolve([]);
         }).
         catch(function (err) {
+            winston.log('debug', 'MUSIX_CONTROLLER Error', {
+                err: err
+            });
             return Promise.resolve([]);
         });
 };

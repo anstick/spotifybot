@@ -133,6 +133,8 @@ module.exports = [
                 });
 
             }
+        }).catch(function (err) {
+            endDialog(session, Dict.getRandomValue('error'), err);
         });
 
     },

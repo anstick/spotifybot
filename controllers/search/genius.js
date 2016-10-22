@@ -6,6 +6,10 @@ var winston                     =   require('winston');
 
 exports.search = function (query, count) {
     var count = count || 5;
+    winston.log('debug', 'GENIUS_CONTROLLER start', {
+        query: query,
+        count: count
+    });
     return new Promise(function (done) {
         // Search Genius.
         geniusClient.search(query, function (error, results) {
@@ -19,19 +23,23 @@ exports.search = function (query, count) {
                         throw new Error('status ' + json.meta.status);
                     }
                     if (json.response.hits && json.response.hits.length) {
-                        done(Promise.all(json.response.hits.filter(function (hit) {
-                                    return hit.type === 'song';
-                                })
-                                .slice(0, count)
-                                .map(function (hit) {
-                                    return Promise.resolve({
-                                        artist: hit.result.primary_artist.name,
-                                        title: hit.result.title,
-                                        coincidence: 1,
-                                        url: hit.result.url
-                                    });
-                                }))
-                        );
+                        done(Promise.all(json.response.hits
+                            .filter(function (hit) {
+                                return hit.type === 'song';
+                            })
+                            .slice(0, count)
+                            .map(function (hit) {
+
+                                winston.log('debug', 'GENIUS_CONTROLLER results', {
+                                    results: hit
+                                });
+                                return Promise.resolve({
+                                    artist: hit.result.primary_artist.name,
+                                    title: hit.result.title,
+                                    coincidence: 1,
+                                    url: hit.result.url
+                                });
+                            })));
                     }
                     else {
                         throw new Error('no results');

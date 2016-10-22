@@ -60,5 +60,8 @@
   "negative_result":[
       "👎 I have no idea what song can it be 😢",
       "💩 No idea... At all.."
+  ],
+  "error":[
+    "Sorry. An error has occurred. We need to start over"
   ]
 }

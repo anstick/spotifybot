@@ -141,8 +141,6 @@ module.exports = new builder.SimpleDialog(
                         ]));
                 }
 
-
-
                 session.send(new builder.Message(session)
                     .sourceEvent({
                         facebook: {
