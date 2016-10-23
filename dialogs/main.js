@@ -60,6 +60,12 @@ module.exports = [
                         }
                         winston.log('debug', 'MAIN_DIALOG: Sound text: ' + text);
 
+                        var split = text.split(' ');
+                        if (split.length > 6){
+                            split.shift();
+                            text = split.join(' ');
+                        }
+
                         session.send(Dict.getRandomValue('sound_parsed') + text);
 
                         _.defer(function () {

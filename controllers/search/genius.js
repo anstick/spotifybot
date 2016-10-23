@@ -37,7 +37,7 @@ exports.search = function (query, count) {
                                     return Promise.resolve({
                                         artist: hit.result.primary_artist.name,
                                         title: hit.result.title,
-                                        coincidence: 0.8,
+                                        coincidence: 0.5,
                                         url: hit.result.url
                                     });
                                 })));

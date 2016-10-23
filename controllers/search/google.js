@@ -6,19 +6,21 @@ var _               =   require('underscore');
 
 var Scrapper        =   require('../scrapper/azlyrics');
 var utils           =   require('../../utils/search');
+var delay           =   require('delay');
 
 google.resultsPerPage = 25;
 var domain = 'azlyrics.com';
 
 exports.search = function (query, count) {
-    count = count || 5;
+    count = 5;
 
     winston.log('debug', 'GOOGLE_SEARCH_CONTROLLER start', {
         query: query,
         count: count
     });
+    var originalQuery = query;
 
-    return Promise.all(utils.splitByWords(query, 5).map(function (query, index) {
+    return Promise.all(utils.splitByWords(query, 6).map(function (query, index) {
         return new Promise(function (done) {
             _.delay(function () {
                 try {
@@ -39,7 +41,7 @@ exports.search = function (query, count) {
                                 coincidence: c
                             });
                         }
-                        winston.log('debug', 'GOOGLE_SEARCH_CONTROLLER results', {
+                        winston.log('debug', 'GOOGLE_SEARCH_CONTROLLER results for ' + query, {
                             results: links
                         });
                         done(Promise.resolve(links));
@@ -55,21 +57,38 @@ exports.search = function (query, count) {
         });
     }))
     .then(function (links) {
-        return Promise.all(_.flatten(links).map(function (item) {
-            return Scrapper.scrape(item.url)
+        var grouped =  _.groupBy(_.flatten(links), function (el) { return el.url;});
+        var mapped =  _.map(
+            grouped,
+            function (elements, url) {
+                return {
+                    url: url,
+                    coincidence: _.reduce(elements, function (memo, el) {
+                        return memo +
+                            (el.coincidence > 0.5 ? el.coincidence : 0);
+                    }, 0)
+                }
+            }
+        );
+        var sorted = _.sortBy(mapped,  'coincidence').reverse();
+        return Promise.resolve(sorted.slice(0,count));
+    })
+    .then(function (links) {
+        return Promise.all(_.flatten(links).map(function (item, index) {
+            return delay(50*index)
+                .then(function(){
+                    return Scrapper.scrape(item.url, originalQuery);
+                })
                 .then(function (scrapeResult) {
-                    if (scrapeResult){
-                        scrapeResult.coincidence = item.coincidence;
-                    }
                     return Promise.resolve(scrapeResult);
                 });
         }))
     })
     .then(function (results) {
-        var r =  _.uniq(_.sortBy(results, 'coincidence').reverse(), true, function (el) {
-            return el.url;
+            var res = _.filter(results, function (el) {
+            return el && el.coincidence >= 0.6;
         });
-        return Promise.resolve(r);
+        return Promise.resolve(_.sortBy(res, 'coincidence').reverse());
     })
     .catch(function (err) {
         winston.log('error', 'GOOGLE_SEARCH_CONTROLLER error', {
