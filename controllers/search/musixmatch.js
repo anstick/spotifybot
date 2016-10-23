@@ -44,7 +44,7 @@ exports.search = function (query, count) {
             return Promise.resolve([]);
         }).
         catch(function (err) {
-            winston.log('debug', 'MUSIX_CONTROLLER Error', {
+            winston.log('error', 'MUSIX_CONTROLLER Error', {
                 err: err
             });
             return Promise.resolve([]);

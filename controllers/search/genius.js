@@ -47,7 +47,7 @@ exports.search = function (query, count) {
                         }
                     }
                     catch (error){
-                        winston.log('debug', "GENIUS_SEARCH_CONTROLLER: Error", {
+                        winston.log('error', "GENIUS_SEARCH_CONTROLLER: Error", {
                             err: error
                         });
                         done(Promise.resolve([]));
@@ -56,7 +56,7 @@ exports.search = function (query, count) {
             });
         }
         catch (error){
-            winston.log('debug', "GENIUS_SEARCH_CONTROLLER: Error", {
+            winston.log('error', "GENIUS_SEARCH_CONTROLLER: Error", {
                 err: error
             });
             done(Promise.resolve([]));

@@ -32,7 +32,7 @@ exports.scrape = function (url) {
                       done(result);
                   }
                   catch (e){
-                      winston.log('debug', 'Scrapper error', {
+                      winston.log('error', 'Scrapper error', {
                           err: e
                       });
                       done(null);

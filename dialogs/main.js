@@ -10,14 +10,15 @@ var SearchSongController3   =   require('../controllers/search/musixmatch');
 
 function endDialog(session, message, err) {
     _.defer(function () {
-
-        var params = {};
         if (err){
-            params.err = err;
-            params.stack = err.stack && err.stack.split('\n')
+            winston.log('error', 'MAIN_DIALOG: FINISH DIALOG with Error',{
+                err: err,
+                stack: err.stack && err.stack.split('\n')
+            });
         }
-
-        winston.log('debug', 'MAIN_DIALOG: FINISH DIALOG', params);
+        else{
+            winston.log('debug', 'MAIN_DIALOG: FINISH DIALOG');
+        }
 
         if (message){
             session.send(message);
@@ -139,19 +140,25 @@ module.exports = [
         });
 
     },
-    function (session, results, next) {
+    function (session, results) {
 
-        if (results && results.resumed === builder.ResumeReason.completed ){
-            winston.log('debug', 'MAIN_DIALOG: Search success');
-            session.send(Dict.getRandomValue('positive_result'));
-        }else{
-            winston.log('debug', "MAIN_DIALOG: Search failed. " + results.message, {
-                err: results.error
-            });
-
-            session.send(Dict.getRandomValue('negative_result'));
+        if (results && results.childId === '*:/songchoice'){
+            switch  (results.resumed){
+                case builder.ResumeReason.completed:
+                    winston.log('debug', 'MAIN_DIALOG: Search success');
+                    session.send(Dict.getRandomValue('positive_result'));
+                    break;
+                case builder.ResumeReason.canceled:
+                    winston.log('debug', "MAIN_DIALOG: cancelled. ");
+                    break;
+                default:
+                    winston.log('debug', "MAIN_DIALOG: Search failed. " + results.message, {
+                        err: results.error
+                    });
+                    session.send(Dict.getRandomValue('negative_result'));
+                    break;
+            }
         }
-
         endDialog(session);
     }
 ];

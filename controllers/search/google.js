@@ -46,7 +46,7 @@ exports.search = function (query, count) {
                     });
                 }
                 catch (e){
-                    winston.log('debug', 'GOOGLE_SEARCH_CONTROLLER search failed', {
+                    winston.log('error', 'GOOGLE_SEARCH_CONTROLLER search failed', {
                         e: e
                     });
                     done(Promise.resolve([]));
@@ -72,7 +72,7 @@ exports.search = function (query, count) {
         return Promise.resolve(r);
     })
     .catch(function (err) {
-        winston.log('debug', 'GOOGLE_SEARCH_CONTROLLER error', {
+        winston.log('error', 'GOOGLE_SEARCH_CONTROLLER error', {
             e: err
         });
         return Promise.resolve([]);

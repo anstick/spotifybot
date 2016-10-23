@@ -11,7 +11,7 @@ function endDialogWithError(session, err, msg) {
     });
 
     var result = {
-        resumed: builder.ResumeReason.notCompleted,
+        resumed: err?builder.ResumeReason.notCompleted:builder.ResumeReason.canceled,
         error: err
     };
 
@@ -26,28 +26,33 @@ module.exports = new builder.SimpleDialog(
     function (session, args) {
         if (args.childId === 'BotBuilder:Prompts'){
             if (args.resumed === builder.ResumeReason.completed){
-                if (args.response){
-                    winston.log('debug', 'SONG_CHOICE_DIALOG: Song was right', {
-                        song: session.dialogData.foundSong
-                    });
+                switch (args.response.index){
+                    case 0:
+                        winston.log('debug', 'SONG_CHOICE_DIALOG: Song was right', {
+                            song: session.dialogData.foundSong
+                        });
 
-                    setTimeout(function () {
-                        session.endDialog();
-                    }, 0);
-                }
-                else{
-                    winston.log('debug', 'SONG_CHOICE_DIALOG: Song wasn\'t right. Restart dialog', {
-                        song: session.dialogData.foundSong
-                    });
+                        setTimeout(function () {
+                            session.endDialog();
+                        }, 0);
+                        break;
+                    case 1:
+                        winston.log('debug', 'SONG_CHOICE_DIALOG: Song wasn\'t right. Restart dialog', {
+                            song: session.dialogData.foundSong
+                        });
 
-                    session.replaceDialog("/songchoice", {
-                        songs:session.dialogData.songs,
-                        foundSong: session.dialogData.foundSong
-                    });
+                        session.replaceDialog("/songchoice", {
+                            songs:session.dialogData.songs,
+                            foundSong: session.dialogData.foundSong
+                        });
+                        break;
+                    default:
+                        endDialogWithError(session);
+                        break;
                 }
             }
             else{
-                winston.log('debug', 'SONG_CHOICE_DIALOG: User interruprt Confirm');
+                winston.log('debug', 'SONG_CHOICE_DIALOG: User interruprt Choice');
                 session.reset('/');
             }
             return;
@@ -168,14 +173,14 @@ module.exports = new builder.SimpleDialog(
                 session.dialogData.foundSong = song;
 
                 setTimeout(function () {
-                    builder.Prompts.confirm(session, Dict.getRandomValue("am_i_right"), {
-                        maxRetries: 0
+                    builder.Prompts.choice(session, Dict.getRandomValue("am_i_right"),['yep', 'nope', 'start over'], {
+                        maxRetries: 2
                     });
                 }, 200);
 
             })
             .catch(function (err) {
-                winston.log('debug', 'SONG_CHOICE_DIALOG: Spotify Error', {
+                winston.log('error', 'SONG_CHOICE_DIALOG: Spotify Error', {
                     err: err
                 });
 
