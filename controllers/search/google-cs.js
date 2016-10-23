@@ -87,31 +87,42 @@ exports.search = function (query, count) {
         count: count
     });
     return new Promise(function (done, fail) {
-        googleSearch.build({
-            q: query,
-            num: count
-        }, function(err, response) {
-            if (err) done(Promise.resolve([]));
-            else {
-                if (response.error){
-                    done(Promise.resolve([]));
-                }else{
-                    winston.log('debug', 'GOOGLE_SEARCH_CONTROLLER results', {
-                        results: response.items
-                    });
-                    if (response.items && response.items.length){
-                        done(Promise.resolve(response.items.map(function (item) {
-                            return {
-                                url:item.link,
-                                coincidence: utils.coincidence(query, item.snippet)
-                            }
-                        })));
-                    }
-                    else{
-                        done(Promise.resolve([]));
+        try{
+            googleSearch.build({
+                q: query,
+                num: count
+            }, function(err, response) {
+                if (err){
+                    throw err;
+                }
+                else {
+                    if (response.error){
+                       throw new Error('Response error ' + response.error);
+                    }else{
+                        winston.log('debug', 'GOOGLE_SEARCH_CONTROLLER results', {
+                            results: response.items
+                        });
+                        if (response.items && response.items.length){
+                            done(Promise.resolve(response.items.map(function (item) {
+                                return {
+                                    url:item.link,
+                                    coincidence: utils.coincidence(query, item.snippet)
+                                }
+                            })));
+                        }
+                        else{
+                            done(Promise.resolve([]));
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
+        catch (e){
+            winston.log('debug', 'GOOGLE_SEARCH_CONTROLLER error', {
+                err: e
+            });
+            done(Promise.resolve([]));
+        }
+
     });
 };

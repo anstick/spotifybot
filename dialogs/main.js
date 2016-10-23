@@ -14,6 +14,7 @@ function endDialog(session, message, err) {
         var params = {};
         if (err){
             params.err = err;
+            params.stack = err.stack && err.stack.split('\n')
         }
 
         winston.log('debug', 'MAIN_DIALOG: FINISH DIALOG', params);

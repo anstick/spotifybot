@@ -70,6 +70,12 @@ exports.search = function (query, count) {
             return el.url;
         });
         return Promise.resolve(r);
+    })
+    .catch(function (err) {
+        winston.log('debug', 'GOOGLE_SEARCH_CONTROLLER error', {
+            e: err
+        });
+        return Promise.resolve([]);
     });
 
 };

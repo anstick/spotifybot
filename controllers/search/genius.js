@@ -12,46 +12,55 @@ exports.search = function (query, count) {
     });
     return new Promise(function (done) {
         // Search Genius.
-        geniusClient.search(query, function (error, results) {
-            if (error){
-                done(Promise.resolve([]));
-            }
-            else{
-                try {
-                    var json = JSON.parse(results);
-                    if (json.meta.status !== 200){
-                        throw new Error('status ' + json.meta.status);
-                    }
-                    if (json.response.hits && json.response.hits.length) {
-                        done(Promise.all(json.response.hits
-                            .filter(function (hit) {
-                                return hit.type === 'song';
-                            })
-                            .slice(0, count)
-                            .map(function (hit) {
-
-                                winston.log('debug', 'GENIUS_CONTROLLER results', {
-                                    results: hit
-                                });
-                                return Promise.resolve({
-                                    artist: hit.result.primary_artist.name,
-                                    title: hit.result.title,
-                                    coincidence: 0.8,
-                                    url: hit.result.url
-                                });
-                            })));
-                    }
-                    else {
-                        throw new Error('no results');
-                    }
-                }
-                catch (error){
-                    winston.log('debug', "GENIUS_SEARCH_CONTROLLER: Error", {
-                        err: error
-                    });
+        try{
+            geniusClient.search(query, function (error, results) {
+                if (error){
                     done(Promise.resolve([]));
                 }
-            }
-        });
+                else{
+                    try {
+                        var json = JSON.parse(results);
+                        if (json.meta.status !== 200){
+                            throw new Error('status ' + json.meta.status);
+                        }
+                        if (json.response.hits && json.response.hits.length) {
+                            done(Promise.all(json.response.hits
+                                .filter(function (hit) {
+                                    return hit.type === 'song';
+                                })
+                                .slice(0, count)
+                                .map(function (hit) {
+
+                                    winston.log('debug', 'GENIUS_CONTROLLER results', {
+                                        results: hit
+                                    });
+                                    return Promise.resolve({
+                                        artist: hit.result.primary_artist.name,
+                                        title: hit.result.title,
+                                        coincidence: 0.8,
+                                        url: hit.result.url
+                                    });
+                                })));
+                        }
+                        else {
+                            throw new Error('no results');
+                        }
+                    }
+                    catch (error){
+                        winston.log('debug', "GENIUS_SEARCH_CONTROLLER: Error", {
+                            err: error
+                        });
+                        done(Promise.resolve([]));
+                    }
+                }
+            });
+        }
+        catch (error){
+            winston.log('debug', "GENIUS_SEARCH_CONTROLLER: Error", {
+                err: error
+            });
+            done(Promise.resolve([]));
+        }
+
     })
 };
