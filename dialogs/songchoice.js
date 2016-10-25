@@ -174,7 +174,7 @@ module.exports = new builder.SimpleDialog(
 
                 setTimeout(function () {
                     builder.Prompts.choice(session, Dict.getRandomValue("am_i_right"),['yep', 'nope', 'start over'], {
-                        maxRetries: 2
+                        maxRetries: 0
                     });
                 }, 200);
 
