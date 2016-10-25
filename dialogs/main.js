@@ -8,16 +8,18 @@ var SearchSongController1   =   require('../controllers/search/genius');
 var SearchSongController2   =   require('../controllers/search/google');
 var SearchSongController3   =   require('../controllers/search/musixmatch');
 
+const KEY = "MAIN_DIALOG";
+
 function endDialog(session, message, err) {
     _.defer(function () {
         if (err){
-            winston.log('error', 'MAIN_DIALOG: FINISH DIALOG with Error',{
+            winston.error(KEY, 'FINISH DIALOG with Error',{
                 err: err,
                 stack: err.stack && err.stack.split('\n')
             });
         }
         else{
-            winston.log('debug', 'MAIN_DIALOG: FINISH DIALOG');
+            winston.debug(KEY, 'FINISH DIALOG');
         }
 
         if (message){
@@ -48,7 +50,7 @@ module.exports = [
             });
 
             if (sounds && sounds.length) {
-                winston.log('debug', 'MAIN_DIALOG: Send sound ' + sounds[0].contentUrl);
+                winston.debug(KEY, 'Send sound ' + sounds[0].contentUrl);
 
                 session.send(Dict.getRandomValue('incoming_sound'));
                 session.send(Dict.getRandomValue('parsing_sound'));
@@ -58,7 +60,7 @@ module.exports = [
                         if (!text){
                             throw new Error('Empty text from recogniser');
                         }
-                        winston.log('debug', 'MAIN_DIALOG: Sound text: ' + text);
+                        winston.debug(KEY, 'Sound text: ' + text);
 
                         var split = text.split(' ');
                         if (split.length > 6){
@@ -87,7 +89,7 @@ module.exports = [
     },
     function (session, results, next) {
       if (session.dialogData.soundText){
-          winston.log('debug', 'MAIN_DIALOG: Use text from sound: '+  session.dialogData.soundText);
+          winston.debug(KEY, 'Use text from sound: '+  session.dialogData.soundText);
           session.dialogData.userText = session.dialogData.soundText;
       }else {
           session.dialogData.userText = session.message.text;
@@ -119,7 +121,7 @@ module.exports = [
             return controller.search(session.dialogData.userText, 1)
         }))
         .then(function (songs) {
-            winston.log('debug', "MAIN_DIALOG: SearchSongController results", {
+            winston.debug(KEY, "SearchSongController results", {
                 results: songs
             });
 
@@ -137,7 +139,9 @@ module.exports = [
 
             }else{
                 _.defer(function () {
-                    next();
+                    winston.debug(KEY, "Nothing found");
+                    endDialog(session, Dict.getRandomValue('negative_result'));
+                    return
                 });
 
             }
@@ -151,14 +155,14 @@ module.exports = [
         if (results && results.childId === '*:/songchoice'){
             switch  (results.resumed){
                 case builder.ResumeReason.completed:
-                    winston.log('debug', 'MAIN_DIALOG: Search success');
+                    winston.debug(KEY, 'Search success');
                     session.send(Dict.getRandomValue('positive_result'));
                     break;
                 case builder.ResumeReason.canceled:
-                    winston.log('debug', "MAIN_DIALOG: cancelled. ");
+                    winston.debug(KEY, "cancelled. ");
                     break;
                 default:
-                    winston.log('debug', "MAIN_DIALOG: Search failed. " + results.message, {
+                    winston.debug(KEY, "Search failed. " + results.message, {
                         err: results.error
                     });
                     session.send(Dict.getRandomValue('negative_result'));

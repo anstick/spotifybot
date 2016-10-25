@@ -99,7 +99,7 @@ module.exports.splitByWords = function (query, count) {
         temp+= (temp? ' ': '') + words[i];
         if (i!==0 &&
             i%count === 0 &&
-            (words.length - i - 1) > Math.floor(count/2) ||
+            (words.length - i - 1) >= Math.floor(count/2) ||
             (i === words.length -1)){
             res.push(temp);
             temp = '';

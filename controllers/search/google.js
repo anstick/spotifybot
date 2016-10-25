@@ -12,7 +12,9 @@ var domain = 'azlyrics.com';
 
 const KEY = "GOOGLE_SEARCH_CONTROLLER";
 
-exports.search = function (query, count) {
+const MAX_WORDS_IN_QUERY = 6;
+
+function search(query, count) {
     count = 5;
 
     winston.debug(KEY,'start', {
@@ -20,8 +22,7 @@ exports.search = function (query, count) {
         count: count
     });
     var originalQuery = query;
-
-    return Promise.all(utils.splitByWords(query, 6).map(function (query, index) {
+    return Promise.all(utils.splitByWords(originalQuery, MAX_WORDS_IN_QUERY).map(function (query, index) {
         return new Promise(function (done) {
             _.delay(function () {
                 try {
@@ -85,9 +86,20 @@ exports.search = function (query, count) {
         });
         return Promise.resolve(_.sortBy(res, 'coincidence').reverse());
     })
+    .then(function (results) {
+        //Google often sucks if first word in request is incorrect
+        if (results && results.length === 0) {
+            var split = originalQuery.split(' ');
+            if (split.length > MAX_WORDS_IN_QUERY){
+                return search(split.slice(1).join(" "), count);
+            }
+        }
+        return Promise.resolve(results);
+    })
     .catch(function (err) {
         winston.error(KEY,'error', {e: err});
         return Promise.resolve([]);
     });
+}
 
-};
+exports.search = search;

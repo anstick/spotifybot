@@ -14,7 +14,8 @@ exports.scrape = function (urls, originalQuery) {
                 url: item,
                 query: originalQuery
             },
-            json: true
+            json: true,
+            timeout: 5000
         })
         .then(function (result) {
             winston.debug(KEY, 'success', result);
