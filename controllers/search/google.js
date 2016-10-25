@@ -5,23 +5,17 @@ var winston         =   require('winston');
 var _               =   require('underscore');
 var utils           =   require('../../utils/search');
 var delay           =   require('delay');
-
-
-var Scrapper
-if (process.env.AZLYRICS_PROXY_URL){
-    Scrapper        =   require('../scrapper/azlyrics-proxy');
-}else{
-
-    Scrapper        =   require('../scrapper/azlyrics');
-}
+var Scrapper        =   require('../scrapper/scrapper');
 
 google.resultsPerPage = 25;
 var domain = 'azlyrics.com';
 
+const KEY = "GOOGLE_SEARCH_CONTROLLER";
+
 exports.search = function (query, count) {
     count = 5;
 
-    winston.log('debug', 'GOOGLE_SEARCH_CONTROLLER start', {
+    winston.debug(KEY,'start', {
         query: query,
         count: count
     });
@@ -31,7 +25,7 @@ exports.search = function (query, count) {
         return new Promise(function (done) {
             _.delay(function () {
                 try {
-                    winston.log('debug', 'GOOGLE_SEARCH_CONTROLLER search partial query', {
+                    winston.debug(KEY,'search partial query', {
                         query: query
                     });
                     google(query + (domain? (" site:"+domain):""), function (err, res){
@@ -48,14 +42,14 @@ exports.search = function (query, count) {
                                 coincidence: c
                             });
                         }
-                        winston.log('debug', 'GOOGLE_SEARCH_CONTROLLER results for ' + query, {
+                        winston.debug(KEY,'results for ' + query, {
                             results: links
                         });
                         done(Promise.resolve(links));
                     });
                 }
                 catch (e){
-                    winston.log('error', 'GOOGLE_SEARCH_CONTROLLER search failed', {
+                    winston.error(KEY,'search failed', {
                         e: e
                     });
                     done(Promise.resolve([]));
@@ -78,29 +72,21 @@ exports.search = function (query, count) {
             }
         );
         var sorted = _.sortBy(mapped,  'coincidence').reverse();
-        return Promise.resolve(sorted.slice(0,count));
+        return Promise.resolve(sorted.slice(0,count).map(function (el) {
+            return el.url;
+        }));
     })
     .then(function (links) {
-        return Promise.all(_.flatten(links).map(function (item, index) {
-            return delay(50*index)
-                .then(function(){
-                    return Scrapper.scrape(item.url, originalQuery);
-                })
-                .then(function (scrapeResult) {
-                    return Promise.resolve(scrapeResult);
-                });
-        }))
+        return Scrapper.scrape(links, originalQuery);
     })
     .then(function (results) {
             var res = _.filter(results, function (el) {
-            return el && el.coincidence >= 0.6;
+            return el && el.coincidence >= 0.25;
         });
         return Promise.resolve(_.sortBy(res, 'coincidence').reverse());
     })
     .catch(function (err) {
-        winston.log('error', 'GOOGLE_SEARCH_CONTROLLER error', {
-            e: err
-        });
+        winston.error(KEY,'error', {e: err});
         return Promise.resolve([]);
     });
 

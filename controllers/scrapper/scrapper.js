@@ -1,19 +1,21 @@
 var winston     =   require('winston');
 var rp          =   require('request-promise');
-
+var _           =   require('underscore');
 const KEY = "SCRAPPER_PROXY";
 
-exports.scrape = function (url, originalQuery) {
-    winston.debug(KEY, 'start', {url: url});
+exports.scrape = function (urls, originalQuery) {
+    winston.debug(KEY, 'init', {urls: urls});
 
-    var options = {
-        uri: process.env.AZLYRICS_PROXY_URL,
-        qs:{
-            url: url,
-            query: originalQuery
-        }
-    };
-    return rp(options)
+    return Promise.all(_.flatten(urls).map(function (item) {
+        winston.debug(KEY, 'start', {url: item});
+        return rp({
+            uri: process.env.SCRAPPER_URL,
+            qs:{
+                url: item,
+                query: originalQuery
+            },
+            json: true
+        })
         .then(function (result) {
             winston.debug(KEY, 'success', result);
             return Promise.resolve(result);
@@ -25,4 +27,5 @@ exports.scrape = function (url, originalQuery) {
             });
             return Promise.resolve(null);
         });
+    }));
 };

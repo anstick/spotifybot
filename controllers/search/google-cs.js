@@ -1,5 +1,4 @@
 var Promise     =   require('promise');
-var Scrapper    =   require('../scrapper/azlyrics');
 var winston     =   require('winston');
 var https       =   require('https');
 var _           =   require('underscore');

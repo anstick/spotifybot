@@ -1,6 +1,9 @@
-var Promise =   require('promise');
-var MusicMatch = require('musicmatch');
-var winston =   require('winston');
+var Promise     =   require('promise');
+var MusicMatch  =   require('musicmatch');
+var winston     =   require('winston');
+var Scrapper    =   require('../scrapper/scrapper');
+var _           =   require('underscore');
+const KEY = "MUSIX_CONTROLLER";
 
 var music = new MusicMatch({
     format:"json",
@@ -12,7 +15,7 @@ music._datas.apikey = process.env.MUSIXMATCH_API_KEY || "";
 
 exports.search = function (query, count) {
     var count = count || 5;
-    winston.log('debug', 'MUSIX_CONTROLLER start', {
+    winston.debug(KEY, 'start', {
         query: query,
         count: count
     });
@@ -25,28 +28,29 @@ exports.search = function (query, count) {
         })
         .then(function(data){
             return Promise.all(data.message.body.track_list.map(function (el) {
-
-                return Promise.resolve({
-                    artist: el.track.artist_name,
-                    title: el.track.track_name,
-                    coincidence: 0.5,
-                    url: el.track.track_share_url
-                });
+                return Promise.resolve(el.track.track_share_url);
             }))
         })
         .then(function (results) {
             if (results && results.length){
-                winston.log('debug', 'MUSIX_CONTROLLER results', {
+                winston.debug(KEY, 'results', {
                     results: results
                 });
                 return Promise.resolve(results);
             }
             return Promise.resolve([]);
-        }).
-        catch(function (err) {
-            winston.log('error', 'MUSIX_CONTROLLER Error', {
-                err: err
+        })
+        .then(function (links) {
+            return Scrapper.scrape(links, query);
+        })
+        .then(function (results) {
+            var res = _.filter(results, function (el) {
+                return el && el.coincidence >= 0.25;
             });
+            return Promise.resolve(_.sortBy(res, 'coincidence').reverse());
+        })
+        .catch(function (err) {
+            winston.error(KEY, 'Error', {err: err});
             return Promise.resolve([]);
         });
 };
