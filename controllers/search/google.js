@@ -82,7 +82,7 @@ function search(query, count) {
     })
     .then(function (results) {
             var res = _.filter(results, function (el) {
-            return el && el.coincidence >= 0.25;
+            return el && el.coincidence > 1/originalQuery.split(' ').length;
         });
         return Promise.resolve(_.sortBy(res, 'coincidence').reverse());
     })

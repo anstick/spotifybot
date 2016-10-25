@@ -60,8 +60,9 @@ exports.search = function (query, count) {
         return Scrapper.scrape(links, query);
     })
     .then(function (results) {
+
         var res = _.filter(results, function (el) {
-            return el && el.coincidence >= 0.25;
+            return el && el.coincidence > 1/query.split(' ').length;
         });
         return Promise.resolve(_.sortBy(res, 'coincidence').reverse());
     })

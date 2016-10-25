@@ -3,6 +3,7 @@ var MusicMatch  =   require('musicmatch');
 var winston     =   require('winston');
 var Scrapper    =   require('../scrapper/scrapper');
 var _           =   require('underscore');
+var utils       =   require('../../utils/search');
 const KEY = "MUSIX_CONTROLLER";
 
 var music = new MusicMatch({
@@ -28,7 +29,18 @@ exports.search = function (query, count) {
         })
         .then(function(data){
             return Promise.all(data.message.body.track_list.map(function (el) {
-                return Promise.resolve(el.track.track_share_url);
+                return music.trackLyrics({
+                        track_id: el.track.track_id
+                    })
+                    .then(function (data) {
+                        return Promise.resolve({
+                            "artist": el.track.artist_name,
+                            "title": el.track.track_name,
+                            "url": el.track.track_share_url,
+                            "coincidence": utils.coincidence(query, data.message.body.lyrics.lyrics_body)
+                        });
+                });
+
             }))
         })
         .then(function (results) {
@@ -40,12 +52,9 @@ exports.search = function (query, count) {
             }
             return Promise.resolve([]);
         })
-        .then(function (links) {
-            return Scrapper.scrape(links, query);
-        })
         .then(function (results) {
             var res = _.filter(results, function (el) {
-                return el && el.coincidence >= 0.25;
+                return el && el.coincidence > 1/query.split(' ').length;
             });
             return Promise.resolve(_.sortBy(res, 'coincidence').reverse());
         })
