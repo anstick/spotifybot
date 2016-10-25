@@ -5,12 +5,17 @@ var dialogs         = requireTree('./dialogs');
 var middlewares     = requireTree('./middlewares');
 var winston         = require('winston');
 
+//require('longjohn');
+
+require('http').globalAgent.maxSockets = Infinity;
+
+
 winston.level = process.env.LOG_LEVEL || 'error';
 winston.remove(winston.transports.Console);
 winston.add(winston.transports.Console, {
-    timestamp:true,
-    handleExceptions: true,
-    humanReadableUnhandledException: true
+    timestamp:true
+    // handleExceptions: true,
+    // humanReadableUnhandledException: true
 });
 
 var provider;

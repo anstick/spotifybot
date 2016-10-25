@@ -3,10 +3,17 @@ var google          =   require('google');
 var googleFallback  =   require('./google-cs');
 var winston         =   require('winston');
 var _               =   require('underscore');
-
-var Scrapper        =   require('../scrapper/azlyrics');
 var utils           =   require('../../utils/search');
 var delay           =   require('delay');
+
+
+var Scrapper
+if (process.env.AZLYRICS_PROXY_URL){
+    Scrapper        =   require('../scrapper/azlyrics-proxy');
+}else{
+
+    Scrapper        =   require('../scrapper/azlyrics');
+}
 
 google.resultsPerPage = 25;
 var domain = 'azlyrics.com';
