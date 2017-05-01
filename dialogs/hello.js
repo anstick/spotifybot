@@ -7,7 +7,7 @@ module.exports = function (session, args, next) {
         .title("Lyrics2Spotify Bot")
         .text("Turns lyrics into Spotify sessions")
         .images([
-            builder.CardImage.create(session, "https://dl.dropboxusercontent.com/u/11861026/logo.jpg")
+            builder.CardImage.create(session, "https://www.dropbox.com/s/my4d3qh5fe4blp0/logo.jpg?raw=1")
         ]);
     var msg = new builder.Message(session).attachments([card]);
     session.send(msg);
